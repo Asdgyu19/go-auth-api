@@ -16,10 +16,27 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// ===================================
-// MODELS (Struktur Data)
-// ===================================
 
+
+// Question represents a popular question model
+type Question struct {
+    ID           int       `json:"id"`
+    Title        string    `json:"title"`
+    Content      string    `json:"content"`
+    CategoryName string    `json:"category_name"`
+    CreatedAt    time.Time `json:"created_at"`
+}
+
+// Article represents a recommended article model
+type Article struct {
+    ID           int       `json:"id"`
+    Title        string    `json:"title"`
+    Thumbnail    string    `json:"thumbnail"` // URL to image
+    CategoryName string    `json:"category_name"`
+    PublishedAt  time.Time `json:"published_at"`
+}
+
+// ... (structs lainnya seperti User, LoginRequest, RegisterRequest, Child, AddChildRequest, Response)
 // User represents the user model for authentication
 type User struct {
 	ID        int       `json:"id"`
@@ -126,7 +143,9 @@ func main() {
 
 	// 6. Initialize Gorilla Mux Router
 	r := mux.NewRouter()
-
+	// Routes untuk Artikel dan Pertanyaan
+r.HandleFunc("/api/popular-questions", getPopularQuestionsHandler).Methods("GET", "OPTIONS")
+r.HandleFunc("/api/recommended-articles", getRecommendedArticlesHandler).Methods("GET", "OPTIONS")
 	// 7. Define API Routes
 	// Route untuk root endpoint (untuk pengecekan status API)
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -236,6 +255,71 @@ func createChildrenTable() {
 // ===================================
 // HANDLER FUNCTIONS - Mengelola Permintaan HTTP
 // ===================================
+
+// ... (existing handlers like registerHandler, loginHandler, addChildHandler, etc.)
+
+// getPopularQuestionsHandler retrieves a list of popular questions.
+func getPopularQuestionsHandler(w http.ResponseWriter, r *http.Request) {
+    log.Println("Get Popular Questions endpoint accessed")
+    if r.Method == "OPTIONS" {
+        w.WriteHeader(http.StatusOK)
+        return
+    }
+
+    questions := []Question{
+        {
+            ID:           1,
+            Title:        "Bagaimana cara meredakan rasa gatal pada bayi yang sedang tumbuh gigi?",
+            Content:      "Ketika bayi tumbuh gigi, gusi mereka mungkin terasa gatal dan tidak nyaman. Ada beberapa cara untuk membantu meredakannya...",
+            CategoryName: "Tumbuh Gigi",
+            CreatedAt:    time.Now().Add(-24 * time.Hour),
+        },
+        {
+            ID:           2,
+            Title:        "Berapa lama idealnya bayi tidur siang?",
+            Content:      "Jumlah tidur siang yang dibutuhkan bayi bervariasi tergantung usia. Bayi baru lahir bisa tidur siang 3-5 jam sehari...",
+            CategoryName: "Tidur Siang",
+            CreatedAt:    time.Now().Add(-48 * time.Hour),
+        },
+    }
+
+    sendResponse(w, true, "Popular questions fetched successfully", questions, http.StatusOK)
+}
+
+// getRecommendedArticlesHandler retrieves a list of recommended articles.
+func getRecommendedArticlesHandler(w http.ResponseWriter, r *http.Request) {
+    log.Println("Get Recommended Articles endpoint accessed")
+    if r.Method == "OPTIONS" {
+        w.WriteHeader(http.StatusOK)
+        return
+    }
+
+    articles := []Article{
+        {
+            ID:           101,
+            Title:        "Makanan Praktis yang dapat Menjadi Sumber Energi",
+            Thumbnail:    "https://via.placeholder.com/180x120.png?text=Nutrisi",
+            CategoryName: "Nutrisi",
+            PublishedAt:  time.Date(2023, 4, 6, 0, 0, 0, 0, time.UTC),
+        },
+        {
+            ID:           102,
+            Title:        "Manfaat Bermain di Luar Ruangan untuk Anak",
+            Thumbnail:    "https://via.placeholder.com/180x120.png?text=Aktivitas",
+            CategoryName: "Aktivitas",
+            PublishedAt:  time.Date(2023, 5, 10, 0, 0, 0, 0, time.UTC),
+        },
+        {
+            ID:           103,
+            Title:        "Pentingnya Imunisasi untuk Tumbuh Kembang Bayi",
+            Thumbnail:    "https://via.placeholder.com/180x120.png?text=Kesehatan",
+            CategoryName: "Kesehatan",
+            PublishedAt:  time.Date(2023, 6, 1, 0, 0, 0, 0, time.UTC),
+        },
+    }
+
+    sendResponse(w, true, "Recommended articles fetched successfully", articles, http.StatusOK)
+}
 
 // registerHandler handles new user registration requests (HTTP POST).
 func registerHandler(w http.ResponseWriter, r *http.Request) {
